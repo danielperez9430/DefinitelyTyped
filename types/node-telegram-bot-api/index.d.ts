@@ -27,6 +27,7 @@ declare namespace TelegramBot {
         | "record_voice"
         | "upload_voice"
         | "upload_document"
+        | "choose_sticker"
         | "find_location"
         | "record_video_note"
         | "upload_video_note";
@@ -88,6 +89,8 @@ declare namespace TelegramBot {
         | "text_link"
         | "text_mention"
         | "spoiler"
+        | "blockquote"
+        | "expandable_blockquote"
         | "custom_emoji";
 
     type ParseMode = "Markdown" | "MarkdownV2" | "HTML";
@@ -100,7 +103,7 @@ declare namespace TelegramBot {
         show_above_text?: boolean;
     }
 
-    type ReactionType = ReactionTypeEmoji | ReactionTypeCustomEmoji;
+    type ReactionType = ReactionTypeEmoji | ReactionTypeCustomEmoji | ReactionTypePaid;
 
     interface AbstractReactionType {
         type: string;
@@ -191,6 +194,15 @@ declare namespace TelegramBot {
         custom_emoji_id: string;
     }
 
+    interface ReactionTypePaid extends AbstractReactionType {
+        type: "paid";
+    }
+
+    interface ReactionCount {
+        type: ReactionType;
+        total_count: number;
+    }
+
     interface ReplyParameters {
         message_id: number;
         chat_id?: ChatId;
@@ -274,7 +286,10 @@ declare namespace TelegramBot {
         cache_time?: number | undefined;
         is_personal?: boolean | undefined;
         next_offset?: string | undefined;
+        button?: InlineQueryResultsButton | undefined;
+        /** @deprecated Use button instead */
         switch_pm_text?: string | undefined;
+        /** @deprecated Use button instead */
         switch_pm_parameter?: string | undefined;
     }
 
@@ -459,6 +474,11 @@ declare namespace TelegramBot {
         can_promote_members?: boolean | undefined;
         can_manage_video_chats?: boolean | undefined;
         can_manage_topics?: boolean | undefined;
+        can_post_stories?: boolean | undefined;
+        can_edit_stories?: boolean | undefined;
+        can_delete_stories?: boolean | undefined;
+        can_manage_direct_messages?: boolean | undefined;
+        can_manage_tags?: boolean | undefined;
     }
 
     interface CreateForumTopicOptions {
@@ -588,16 +608,25 @@ declare namespace TelegramBot {
         edited_message?: Message | undefined;
         channel_post?: Message | undefined;
         edited_channel_post?: Message | undefined;
+        business_connection?: BusinessConnection | undefined;
+        business_message?: Message | undefined;
+        edited_business_message?: Message | undefined;
+        deleted_business_messages?: BusinessMessagesDeleted | undefined;
+        message_reaction?: MessageReactionUpdated | undefined;
+        message_reaction_count?: MessageReactionCountUpdated | undefined;
         inline_query?: InlineQuery | undefined;
         chosen_inline_result?: ChosenInlineResult | undefined;
         callback_query?: CallbackQuery | undefined;
         shipping_query?: ShippingQuery | undefined;
         pre_checkout_query?: PreCheckoutQuery | undefined;
+        purchased_paid_media?: PaidMediaPurchased | undefined;
         poll?: Poll | undefined;
         poll_answer?: PollAnswer | undefined;
         my_chat_member?: ChatMemberUpdated | undefined;
         chat_member?: ChatMemberUpdated | undefined;
         chat_join_request?: ChatJoinRequest | undefined;
+        chat_boost?: ChatBoostUpdated | undefined;
+        removed_chat_boost?: ChatBoostRemoved | undefined;
     }
 
     interface WebhookInfo {
@@ -619,6 +648,13 @@ declare namespace TelegramBot {
         last_name?: string | undefined;
         username?: string | undefined;
         language_code?: string | undefined;
+        is_premium?: boolean | undefined;
+        added_to_attachment_menu?: boolean | undefined;
+        can_join_groups?: boolean | undefined;
+        can_read_all_group_messages?: boolean | undefined;
+        supports_inline_queries?: boolean | undefined;
+        can_connect_to_business?: boolean | undefined;
+        has_main_web_app?: boolean | undefined;
     }
 
     interface Chat {
@@ -629,31 +665,53 @@ declare namespace TelegramBot {
         first_name?: string | undefined;
         last_name?: string | undefined;
         is_forum?: boolean | undefined;
+    }
+
+    interface ChatFullInfo {
+        id: number;
+        type: ChatType;
+        title?: string | undefined;
+        username?: string | undefined;
+        first_name?: string | undefined;
+        last_name?: string | undefined;
+        is_forum?: boolean | undefined;
+        accent_color_id: number;
+        max_reaction_count: number;
         photo?: ChatPhoto | undefined;
         active_usernames?: string[] | undefined;
+        birthdate?: Birthdate | undefined;
+        business_intro?: BusinessIntro | undefined;
+        business_location?: BusinessLocation | undefined;
+        business_opening_hours?: BusinessOpeningHours | undefined;
+        personal_chat?: Chat | undefined;
+        available_reactions?: ReactionType[] | undefined;
+        background_custom_emoji_id?: string | undefined;
+        profile_accent_color_id?: number | undefined;
+        profile_background_custom_emoji_id?: string | undefined;
         emoji_status_custom_emoji_id?: string | undefined;
+        emoji_status_expiration_date?: number | undefined;
         bio?: string | undefined;
+        has_private_forwards?: boolean | undefined;
         has_restricted_voice_and_video_messages?: boolean | undefined;
         join_to_send_messages?: boolean | undefined;
         join_by_request?: boolean | undefined;
         description?: string | undefined;
         invite_link?: string | undefined;
-        has_aggressive_anti_spam_enabled?: boolean | undefined;
-        has_hidden_members?: boolean | undefined;
         pinned_message?: Message | undefined;
         permissions?: ChatPermissions | undefined;
-        can_set_sticker_set?: boolean | undefined;
-        sticker_set_name?: string | undefined;
-        has_private_forwards?: boolean | undefined;
-        has_protected_content?: boolean | undefined;
+        can_send_paid_media?: boolean | undefined;
         slow_mode_delay?: number | undefined;
+        unrestrict_boost_count?: number | undefined;
         message_auto_delete_time?: number | undefined;
+        has_aggressive_anti_spam_enabled?: boolean | undefined;
+        has_hidden_members?: boolean | undefined;
+        has_protected_content?: boolean | undefined;
+        has_visible_history?: boolean | undefined;
+        sticker_set_name?: string | undefined;
+        can_set_sticker_set?: boolean | undefined;
+        custom_emoji_sticker_set_name?: string | undefined;
         linked_chat_id?: number | undefined;
         location?: ChatLocation | undefined;
-        /**
-         * @deprecated since version Telegram Bot API 4.4 - July 29, 2019
-         */
-        all_members_are_administrators?: boolean | undefined;
     }
 
     interface Message {
@@ -663,6 +721,9 @@ declare namespace TelegramBot {
         date: number;
         chat: Chat;
         sender_chat?: Chat | undefined;
+        sender_boost_count?: number | undefined;
+        sender_business_bot?: User | undefined;
+        forward_origin?: MessageOrigin | undefined;
         forward_from?: User | undefined;
         forward_from_chat?: Chat | undefined;
         forward_from_message_id?: number | undefined;
@@ -670,27 +731,41 @@ declare namespace TelegramBot {
         forward_sender_name?: string | undefined;
         forward_date?: number | undefined;
         is_topic_message?: boolean | undefined;
+        is_automatic_forward?: boolean | undefined;
         reply_to_message?: Message | undefined;
+        external_reply?: ExternalReplyInfo | undefined;
+        quote?: TextQuote | undefined;
+        reply_to_story?: Story | undefined;
+        via_bot?: User | undefined;
         edit_date?: number | undefined;
+        has_protected_content?: boolean | undefined;
+        is_from_offline?: boolean | undefined;
         media_group_id?: string | undefined;
         author_signature?: string | undefined;
         text?: string | undefined;
         entities?: MessageEntity[] | undefined;
-        caption_entities?: MessageEntity[] | undefined;
+        link_preview_options?: LinkPreviewOptions | undefined;
+        effect_id?: string | undefined;
+        animation?: Animation | undefined;
         audio?: Audio | undefined;
         document?: Document | undefined;
-        animation?: Animation | undefined;
-        game?: Game | undefined;
+        paid_media?: PaidMediaInfo | undefined;
         photo?: PhotoSize[] | undefined;
         sticker?: Sticker | undefined;
+        story?: Story | undefined;
         video?: Video | undefined;
-        voice?: Voice | undefined;
         video_note?: VideoNote | undefined;
+        voice?: Voice | undefined;
         caption?: string | undefined;
+        caption_entities?: MessageEntity[] | undefined;
+        show_caption_above_media?: boolean | undefined;
+        has_media_spoiler?: boolean | undefined;
         contact?: Contact | undefined;
-        location?: Location | undefined;
-        venue?: Venue | undefined;
+        dice?: Dice | undefined;
+        game?: Game | undefined;
         poll?: Poll | undefined;
+        venue?: Venue | undefined;
+        location?: Location | undefined;
         new_chat_members?: User[] | undefined;
         left_chat_member?: User | undefined;
         new_chat_title?: string | undefined;
@@ -699,27 +774,39 @@ declare namespace TelegramBot {
         group_chat_created?: boolean | undefined;
         supergroup_chat_created?: boolean | undefined;
         channel_chat_created?: boolean | undefined;
+        message_auto_delete_timer_changed?: MessageAutoDeleteTimerChanged | undefined;
         migrate_to_chat_id?: number | undefined;
         migrate_from_chat_id?: number | undefined;
         pinned_message?: Message | undefined;
         invoice?: Invoice | undefined;
         successful_payment?: SuccessfulPayment | undefined;
+        refunded_payment?: RefundedPayment | undefined;
+        users_shared?: UsersShared | undefined;
+        chat_shared?: ChatShared | undefined;
         connected_website?: string | undefined;
+        write_access_allowed?: WriteAccessAllowed | undefined;
         passport_data?: PassportData | undefined;
-        reply_markup?: InlineKeyboardMarkup | undefined;
-        web_app_data?: WebAppData | undefined;
-        is_automatic_forward?: boolean | undefined;
-        has_protected_content?: boolean | undefined;
-        dice?: Dice | undefined;
+        proximity_alert_triggered?: ProximityAlertTriggered | undefined;
+        boost_added?: ChatBoostAdded | undefined;
+        chat_background_set?: ChatBackground | undefined;
         forum_topic_created?: ForumTopicCreated | undefined;
         forum_topic_edited?: ForumTopicEdited | undefined;
         forum_topic_closed?: ForumTopicClosed | undefined;
         forum_topic_reopened?: ForumTopicReopened | undefined;
         general_forum_topic_hidden?: GeneralForumTopicHidden | undefined;
         general_forum_topic_unhidden?: GeneralForumTopicUnhidden | undefined;
-        has_media_spoiler?: boolean | undefined;
+        giveaway_created?: GiveawayCreated | undefined;
+        giveaway?: Giveaway | undefined;
+        giveaway_winners?: GiveawayWinners | undefined;
+        giveaway_completed?: GiveawayCompleted | undefined;
+        video_chat_scheduled?: VideoChatScheduled | undefined;
+        video_chat_started?: VideoChatStarted | undefined;
+        video_chat_ended?: VideoChatEnded | undefined;
+        video_chat_participants_invited?: VideoChatParticipantsInvited | undefined;
+        web_app_data?: WebAppData | undefined;
+        reply_markup?: InlineKeyboardMarkup | undefined;
+        /** @deprecated Use users_shared instead */
         user_shared?: UserShared | undefined;
-        chat_shared?: ChatShared | undefined;
     }
 
     interface MessageEntity {
@@ -747,11 +834,16 @@ declare namespace TelegramBot {
         duration: number;
         performer?: string | undefined;
         title?: string | undefined;
+        file_name?: string | undefined;
         mime_type?: string | undefined;
+        thumbnail?: PhotoSize | undefined;
+        /** @deprecated Use thumbnail instead */
         thumb?: PhotoSize | undefined;
     }
 
     interface Document extends FileBase {
+        thumbnail?: PhotoSize | undefined;
+        /** @deprecated Use thumbnail instead */
         thumb?: PhotoSize | undefined;
         file_name?: string | undefined;
         mime_type?: string | undefined;
@@ -761,7 +853,10 @@ declare namespace TelegramBot {
         width: number;
         height: number;
         duration: number;
+        thumbnail?: PhotoSize | undefined;
+        /** @deprecated Use thumbnail instead */
         thumb?: PhotoSize | undefined;
+        file_name?: string | undefined;
         mime_type?: string | undefined;
     }
 
@@ -780,21 +875,49 @@ declare namespace TelegramBot {
 
     interface InputMediaPhoto extends InputMediaBase {
         type: "photo";
+        show_caption_above_media?: boolean | undefined;
     }
 
     interface InputMediaVideo extends InputMediaBase {
         type: "video";
+        thumbnail?: string | undefined;
         width?: number | undefined;
         height?: number | undefined;
         duration?: number | undefined;
         supports_streaming?: boolean | undefined;
+        show_caption_above_media?: boolean | undefined;
     }
 
-    type InputMedia = InputMediaPhoto | InputMediaVideo;
+    interface InputMediaAnimation extends InputMediaBase {
+        type: "animation";
+        thumbnail?: string | undefined;
+        width?: number | undefined;
+        height?: number | undefined;
+        duration?: number | undefined;
+        show_caption_above_media?: boolean | undefined;
+    }
+
+    interface InputMediaAudio extends InputMediaBase {
+        type: "audio";
+        thumbnail?: string | undefined;
+        duration?: number | undefined;
+        performer?: string | undefined;
+        title?: string | undefined;
+    }
+
+    interface InputMediaDocument extends InputMediaBase {
+        type: "document";
+        thumbnail?: string | undefined;
+        disable_content_type_detection?: boolean | undefined;
+    }
+
+    type InputMedia = InputMediaPhoto | InputMediaVideo | InputMediaAnimation | InputMediaAudio | InputMediaDocument;
 
     interface VideoNote extends FileBase {
         length: number;
         duration: number;
+        thumbnail?: PhotoSize | undefined;
+        /** @deprecated Use thumbnail instead */
         thumb?: PhotoSize | undefined;
     }
 
@@ -814,6 +937,10 @@ declare namespace TelegramBot {
     interface Location {
         longitude: number;
         latitude: number;
+        horizontal_accuracy?: number | undefined;
+        live_period?: number | undefined;
+        heading?: number | undefined;
+        proximity_alert_radius?: number | undefined;
     }
 
     interface Venue {
@@ -828,24 +955,32 @@ declare namespace TelegramBot {
 
     interface PollAnswer {
         poll_id: string;
-        user: User;
+        voter_chat?: Chat | undefined;
+        user?: User | undefined;
         option_ids: number[];
     }
 
     interface PollOption {
         text: string;
+        text_entities?: MessageEntity[] | undefined;
         voter_count: number;
     }
 
     interface Poll {
         id: string;
         question: string;
+        question_entities?: MessageEntity[] | undefined;
         options: PollOption[];
         is_closed: boolean;
         is_anonymous: boolean;
         allows_multiple_answers: boolean;
         type: PollType;
         total_voter_count: number;
+        correct_option_id?: number | undefined;
+        explanation?: string | undefined;
+        explanation_entities?: MessageEntity[] | undefined;
+        open_period?: number | undefined;
+        close_date?: number | undefined;
     }
 
     interface Dice {
@@ -884,6 +1019,8 @@ declare namespace TelegramBot {
         text: string;
         style?: "primary" | "danger" | "success" | undefined;
         icon_custom_emoji_id?: string | undefined;
+        request_users?: KeyboardButtonRequestUsers | undefined;
+        /** @deprecated Use request_users instead */
         request_user?: KeyboardButtonRequestUser | undefined;
         request_chat?: KeyboardButtonRequestChat | undefined;
         request_contact?: boolean | undefined;
@@ -896,10 +1033,21 @@ declare namespace TelegramBot {
         type: PollType;
     }
 
+    /** @deprecated Use KeyboardButtonRequestUsers instead */
     interface KeyboardButtonRequestUser {
         request_id: number;
         user_is_bot?: boolean | undefined;
         user_is_premium?: boolean | undefined;
+    }
+
+    interface KeyboardButtonRequestUsers {
+        request_id: number;
+        user_is_bot?: boolean | undefined;
+        user_is_premium?: boolean | undefined;
+        max_quantity?: number | undefined;
+        request_name?: boolean | undefined;
+        request_username?: boolean | undefined;
+        request_photo?: boolean | undefined;
     }
 
     interface KeyboardButtonRequestChat {
@@ -908,9 +1056,12 @@ declare namespace TelegramBot {
         chat_is_forum?: boolean | undefined;
         chat_has_username?: boolean | undefined;
         chat_is_created?: boolean | undefined;
-        user_administrator_rights?: boolean | undefined;
-        bot_administrator_rights?: boolean | undefined;
+        user_administrator_rights?: ChatAdministratorRights | undefined;
+        bot_administrator_rights?: ChatAdministratorRights | undefined;
         bot_is_member?: boolean | undefined;
+        request_title?: boolean | undefined;
+        request_username?: boolean | undefined;
+        request_photo?: boolean | undefined;
     }
 
     interface ReplyKeyboardRemove {
@@ -991,7 +1142,7 @@ declare namespace TelegramBot {
         member_limit?: number | undefined;
         pending_join_request_count?: number | undefined;
         subscription_period?: number | undefined;
-        subscription_prices?: number | undefined;
+        subscription_price?: number | undefined;
     }
 
     interface ChatMember {
@@ -1037,6 +1188,7 @@ declare namespace TelegramBot {
         | "can_send_polls"
         | "can_send_other_messages"
         | "can_add_web_page_previews"
+        | "can_edit_tag"
         | "can_change_info"
         | "can_invite_users"
         | "can_pin_messages"
@@ -1082,15 +1234,15 @@ declare namespace TelegramBot {
     interface ForumTopicCreated {
         name: string;
         icon_color: number;
-        icon_custom_emoji_id: string;
+        icon_custom_emoji_id?: string | undefined;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-interface -- Currently holds no information (https://core.telegram.org/bots/api#forumtopicclosed)
     interface ForumTopicClosed {}
 
     interface ForumTopicEdited {
-        name: string;
-        icon_custom_emoji_id: string;
+        name?: string | undefined;
+        icon_custom_emoji_id?: string | undefined;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-interface -- Currently holds no information (https://core.telegram.org/bots/api#forumtopicreopened)
@@ -1102,14 +1254,398 @@ declare namespace TelegramBot {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface -- Currently holds no information (https://core.telegram.org/bots/api#generalforumtopicunhidden)
     interface GeneralForumTopicUnhidden {}
 
+    interface ForumTopic {
+        message_thread_id: number;
+        name: string;
+        icon_color: number;
+        icon_custom_emoji_id?: string | undefined;
+    }
+
+    interface Birthdate {
+        day: number;
+        month: number;
+        year?: number | undefined;
+    }
+
+    interface BusinessConnection {
+        id: string;
+        user: User;
+        user_chat_id: number;
+        date: number;
+        is_enabled: boolean;
+    }
+
+    interface BusinessIntro {
+        title?: string | undefined;
+        message?: string | undefined;
+        sticker?: Sticker | undefined;
+    }
+
+    interface BusinessLocation {
+        address: string;
+        location?: Location | undefined;
+    }
+
+    interface BusinessOpeningHours {
+        time_zone_name: string;
+        opening_hours: BusinessOpeningHoursInterval[];
+    }
+
+    interface BusinessOpeningHoursInterval {
+        opening_minute: number;
+        closing_minute: number;
+    }
+
+    interface BusinessMessagesDeleted {
+        business_connection_id: string;
+        chat: Chat;
+        message_ids: number[];
+    }
+
+    interface Story {
+        chat: Chat;
+        id: number;
+    }
+
+    interface WriteAccessAllowed {
+        from_request?: boolean | undefined;
+        web_app_name?: string | undefined;
+        from_attachment_menu?: boolean | undefined;
+    }
+
+    interface ProximityAlertTriggered {
+        traveler: User;
+        watcher: User;
+        distance: number;
+    }
+
+    interface MessageAutoDeleteTimerChanged {
+        message_auto_delete_time: number;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface -- Currently holds no information (https://core.telegram.org/bots/api#videochatstarted)
+    interface VideoChatStarted {}
+
+    interface VideoChatEnded {
+        duration: number;
+    }
+
+    interface VideoChatParticipantsInvited {
+        users: User[];
+    }
+
+    interface VideoChatScheduled {
+        start_date: number;
+    }
+
+    type MessageOrigin = MessageOriginUser | MessageOriginHiddenUser | MessageOriginChat | MessageOriginChannel;
+
+    interface MessageOriginUser {
+        type: "user";
+        date: number;
+        sender_user: User;
+    }
+
+    interface MessageOriginHiddenUser {
+        type: "hidden_user";
+        date: number;
+        sender_user_name: string;
+    }
+
+    interface MessageOriginChat {
+        type: "chat";
+        date: number;
+        sender_chat: Chat;
+        author_signature?: string | undefined;
+    }
+
+    interface MessageOriginChannel {
+        type: "channel";
+        date: number;
+        chat: Chat;
+        message_id: number;
+        author_signature?: string | undefined;
+    }
+
+    interface ExternalReplyInfo {
+        origin: MessageOrigin;
+        chat?: Chat | undefined;
+        message_id?: number | undefined;
+        link_preview_options?: LinkPreviewOptions | undefined;
+        animation?: Animation | undefined;
+        audio?: Audio | undefined;
+        document?: Document | undefined;
+        paid_media?: PaidMediaInfo | undefined;
+        photo?: PhotoSize[] | undefined;
+        sticker?: Sticker | undefined;
+        story?: Story | undefined;
+        video?: Video | undefined;
+        video_note?: VideoNote | undefined;
+        voice?: Voice | undefined;
+        has_media_spoiler?: boolean | undefined;
+        contact?: Contact | undefined;
+        dice?: Dice | undefined;
+        game?: Game | undefined;
+        giveaway?: Giveaway | undefined;
+        giveaway_winners?: GiveawayWinners | undefined;
+        invoice?: Invoice | undefined;
+        location?: Location | undefined;
+        poll?: Poll | undefined;
+        venue?: Venue | undefined;
+    }
+
+    interface TextQuote {
+        text: string;
+        entities?: MessageEntity[] | undefined;
+        position: number;
+        is_manual?: boolean | undefined;
+    }
+
+    interface InaccessibleMessage {
+        chat: Chat;
+        message_id: number;
+        date: number;
+    }
+
+    type MaybeInaccessibleMessage = Message | InaccessibleMessage;
+
+    interface MessageReactionUpdated {
+        chat: Chat;
+        message_id: number;
+        user?: User | undefined;
+        actor_chat?: Chat | undefined;
+        date: number;
+        old_reaction: ReactionType[];
+        new_reaction: ReactionType[];
+    }
+
+    interface MessageReactionCountUpdated {
+        chat: Chat;
+        message_id: number;
+        date: number;
+        reactions: ReactionCount[];
+    }
+
+    interface ChatBoostAdded {
+        boost_count: number;
+    }
+
+    type ChatBoostSource = ChatBoostSourcePremium | ChatBoostSourceGiftCode | ChatBoostSourceGiveaway;
+
+    interface ChatBoostSourcePremium {
+        source: "premium";
+        user: User;
+    }
+
+    interface ChatBoostSourceGiftCode {
+        source: "gift_code";
+        user: User;
+    }
+
+    interface ChatBoostSourceGiveaway {
+        source: "giveaway";
+        giveaway_message_id: number;
+        user?: User | undefined;
+        prize_star_count?: number | undefined;
+        is_unclaimed?: boolean | undefined;
+    }
+
+    interface ChatBoost {
+        boost_id: string;
+        add_date: number;
+        expiration_date: number;
+        source: ChatBoostSource;
+    }
+
+    interface ChatBoostUpdated {
+        chat: Chat;
+        boost: ChatBoost;
+    }
+
+    interface ChatBoostRemoved {
+        chat: Chat;
+        boost_id: string;
+        remove_date: number;
+        source: ChatBoostSource;
+    }
+
+    interface UserChatBoosts {
+        boosts: ChatBoost[];
+    }
+
+    interface Giveaway {
+        chats: Chat[];
+        winners_selection_date: number;
+        winner_count: number;
+        only_new_members?: boolean | undefined;
+        has_public_winners?: boolean | undefined;
+        prize_description?: string | undefined;
+        country_codes?: string[] | undefined;
+        prize_star_count?: number | undefined;
+        premium_subscription_month_count?: number | undefined;
+    }
+
+    interface GiveawayCreated {
+        prize_star_count?: number | undefined;
+    }
+
+    interface GiveawayWinners {
+        chat: Chat;
+        giveaway_message_id: number;
+        winners_selection_date: number;
+        winner_count: number;
+        winners: User[];
+        additional_chat_count?: number | undefined;
+        prize_star_count?: number | undefined;
+        premium_subscription_month_count?: number | undefined;
+        unclaimed_prize_count?: number | undefined;
+        only_new_members?: boolean | undefined;
+        was_refunded?: boolean | undefined;
+        prize_description?: string | undefined;
+    }
+
+    interface GiveawayCompleted {
+        winner_count: number;
+        unclaimed_prize_count?: number | undefined;
+        giveaway_message?: Message | undefined;
+        is_star_giveaway?: boolean | undefined;
+    }
+
+    type BackgroundFill = BackgroundFillSolid | BackgroundFillGradient | BackgroundFillFreeformGradient;
+
+    interface BackgroundFillSolid {
+        type: "solid";
+        color: number;
+    }
+
+    interface BackgroundFillGradient {
+        type: "gradient";
+        top_color: number;
+        bottom_color: number;
+        rotation_angle: number;
+    }
+
+    interface BackgroundFillFreeformGradient {
+        type: "freeform_gradient";
+        colors: number[];
+    }
+
+    type BackgroundType = BackgroundTypeFill | BackgroundTypeWallpaper | BackgroundTypePattern | BackgroundTypeChatTheme;
+
+    interface BackgroundTypeFill {
+        type: "fill";
+        fill: BackgroundFill;
+        dark_theme_dimming: number;
+    }
+
+    interface BackgroundTypeWallpaper {
+        type: "wallpaper";
+        document: Document;
+        dark_theme_dimming: number;
+        is_blurred?: boolean | undefined;
+        is_moving?: boolean | undefined;
+    }
+
+    interface BackgroundTypePattern {
+        type: "pattern";
+        document: Document;
+        fill: BackgroundFill;
+        intensity: number;
+        is_inverted?: boolean | undefined;
+        is_moving?: boolean | undefined;
+    }
+
+    interface BackgroundTypeChatTheme {
+        type: "chat_theme";
+        theme_name: string;
+    }
+
+    interface ChatBackground {
+        type: BackgroundType;
+    }
+
+    type PaidMedia = PaidMediaPreview | PaidMediaPhoto | PaidMediaVideo;
+
+    interface PaidMediaPreview {
+        type: "preview";
+        width?: number | undefined;
+        height?: number | undefined;
+        duration?: number | undefined;
+    }
+
+    interface PaidMediaPhoto {
+        type: "photo";
+        photo: PhotoSize[];
+    }
+
+    interface PaidMediaVideo {
+        type: "video";
+        video: Video;
+    }
+
+    interface PaidMediaInfo {
+        star_count: number;
+        paid_media: PaidMedia[];
+    }
+
+    interface PaidMediaPurchased {
+        from: User;
+        paid_media_payload: string;
+    }
+
+    interface RefundedPayment {
+        currency: string;
+        total_amount: number;
+        invoice_payload: string;
+        telegram_payment_charge_id: string;
+        provider_payment_charge_id?: string | undefined;
+    }
+
+    interface InputPollOption {
+        text: string;
+        text_parse_mode?: ParseMode | undefined;
+        text_entities?: MessageEntity[] | undefined;
+    }
+
+    interface InlineQueryResultsButton {
+        text: string;
+        web_app?: WebAppInfo | undefined;
+        start_parameter?: string | undefined;
+    }
+
+    interface InputSticker {
+        sticker: string;
+        format: "static" | "animated" | "video";
+        emoji_list: string[];
+        mask_position?: MaskPosition | undefined;
+        keywords?: string[] | undefined;
+    }
+
+    /** @deprecated Use UsersShared instead */
     interface UserShared {
         request_id: number;
         user_id: number;
     }
 
+    interface UsersShared {
+        request_id: number;
+        users: SharedUser[];
+    }
+
+    interface SharedUser {
+        user_id: number;
+        first_name?: string | undefined;
+        last_name?: string | undefined;
+        username?: string | undefined;
+        photo?: PhotoSize[] | undefined;
+    }
+
     interface ChatShared {
         request_id: number;
         chat_id: number;
+        title?: string | undefined;
+        username?: string | undefined;
+        photo?: PhotoSize[] | undefined;
     }
 
     interface MaskPosition {
@@ -1122,9 +1658,10 @@ declare namespace TelegramBot {
     interface InlineQuery {
         id: string;
         from: User;
-        location?: Location | undefined;
         query: string;
         offset: string;
+        chat_type?: ChatType | undefined;
+        location?: Location | undefined;
     }
 
     interface InlineQueryResultBase {
@@ -1425,6 +1962,9 @@ declare namespace TelegramBot {
         currency: string;
         total_amount: number;
         invoice_payload: string;
+        subscription_expiration_date?: number | undefined;
+        is_recurring?: boolean | undefined;
+        is_first_recurring?: boolean | undefined;
         shipping_option_id?: string | undefined;
         order_info?: OrderInfo | undefined;
         telegram_payment_charge_id: string;
@@ -1461,6 +2001,8 @@ declare namespace TelegramBot {
         width: number;
         height: number;
         duration: number;
+        thumbnail?: PhotoSize | undefined;
+        /** @deprecated Use thumbnail instead */
         thumb?: PhotoSize | undefined;
         file_name?: string | undefined;
         mime_type?: string | undefined;
@@ -1582,6 +2124,7 @@ declare namespace TelegramBot {
         can_pin_messages?: boolean;
         can_manage_topics?: boolean;
         can_manage_direct_messages?: boolean;
+        can_manage_tags?: boolean;
     }
 
     interface SentWebAppMessage {

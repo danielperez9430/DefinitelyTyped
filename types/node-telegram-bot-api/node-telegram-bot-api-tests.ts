@@ -576,3 +576,228 @@ MyTelegramBot.sendMessage(1234, "test-KeyboardButton", {
         ],
     },
 });
+
+// Test new types from Bot API 7.x+
+
+// User with is_premium
+const userWithPremium: TelegramBot.User = {
+    id: 123,
+    is_bot: false,
+    first_name: "John",
+    is_premium: true,
+    added_to_attachment_menu: true,
+};
+
+// Birthdate
+const birthdate: TelegramBot.Birthdate = {
+    day: 1,
+    month: 1,
+    year: 2000,
+};
+
+// Story
+const story: TelegramBot.Story = {
+    chat: { id: 1234, type: "private" },
+    id: 1,
+};
+
+// MessageOrigin types
+const originUser: TelegramBot.MessageOriginUser = {
+    type: "user",
+    date: 1234567890,
+    sender_user: { id: 123, is_bot: false, first_name: "John" },
+};
+const originHidden: TelegramBot.MessageOriginHiddenUser = {
+    type: "hidden_user",
+    date: 1234567890,
+    sender_user_name: "Hidden User",
+};
+const originChat: TelegramBot.MessageOriginChat = {
+    type: "chat",
+    date: 1234567890,
+    sender_chat: { id: 1234, type: "group" },
+    author_signature: "Admin",
+};
+const originChannel: TelegramBot.MessageOriginChannel = {
+    type: "channel",
+    date: 1234567890,
+    chat: { id: 1234, type: "channel" },
+    message_id: 42,
+};
+const messageOrigin: TelegramBot.MessageOrigin = originUser;
+
+// TextQuote
+const textQuote: TelegramBot.TextQuote = {
+    text: "Quoted text",
+    position: 0,
+    is_manual: true,
+};
+
+// ChatBoost types
+const chatBoostSource: TelegramBot.ChatBoostSource = {
+    source: "premium",
+    user: { id: 123, is_bot: false, first_name: "John" },
+};
+const chatBoost: TelegramBot.ChatBoost = {
+    boost_id: "boost_123",
+    add_date: 1234567890,
+    expiration_date: 1234567890,
+    source: chatBoostSource,
+};
+
+// Giveaway
+const giveaway: TelegramBot.Giveaway = {
+    chats: [{ id: 1234, type: "channel" }],
+    winners_selection_date: 1234567890,
+    winner_count: 5,
+    only_new_members: true,
+    prize_star_count: 100,
+};
+
+// ReactionTypePaid
+const paidReaction: TelegramBot.ReactionTypePaid = {
+    type: "paid",
+};
+const reactionTypes: TelegramBot.ReactionType[] = [
+    { type: "emoji", emoji: "👍" },
+    { type: "custom_emoji", custom_emoji_id: "123" },
+    { type: "paid" },
+];
+
+// PaidMediaInfo
+const paidMediaInfo: TelegramBot.PaidMediaInfo = {
+    star_count: 100,
+    paid_media: [
+        { type: "preview", width: 100, height: 100 },
+        { type: "photo", photo: [{ file_id: "abc", file_unique_id: "def", width: 100, height: 100 }] },
+    ],
+};
+
+// RefundedPayment
+const refundedPayment: TelegramBot.RefundedPayment = {
+    currency: "XTR",
+    total_amount: 100,
+    invoice_payload: "payload",
+    telegram_payment_charge_id: "charge_123",
+};
+
+// ChatFullInfo
+const chatFullInfo: TelegramBot.ChatFullInfo = {
+    id: 1234,
+    type: "private",
+    accent_color_id: 1,
+    max_reaction_count: 3,
+};
+
+// InputMediaAnimation
+const inputMediaAnim: TelegramBot.InputMediaAnimation = {
+    type: "animation",
+    media: "file_id",
+    width: 320,
+    height: 240,
+};
+
+// InputMediaAudio
+const inputMediaAudio: TelegramBot.InputMediaAudio = {
+    type: "audio",
+    media: "file_id",
+    performer: "Artist",
+    title: "Song",
+};
+
+// InputMediaDocument
+const inputMediaDoc: TelegramBot.InputMediaDocument = {
+    type: "document",
+    media: "file_id",
+    disable_content_type_detection: true,
+};
+
+// BackgroundType
+const bgFill: TelegramBot.BackgroundTypeFill = {
+    type: "fill",
+    fill: { type: "solid", color: 0xFFFFFF },
+    dark_theme_dimming: 50,
+};
+const chatBackground: TelegramBot.ChatBackground = {
+    type: bgFill,
+};
+
+// BusinessConnection
+const businessConnection: TelegramBot.BusinessConnection = {
+    id: "conn_123",
+    user: { id: 123, is_bot: false, first_name: "John" },
+    user_chat_id: 456,
+    date: 1234567890,
+    is_enabled: true,
+};
+
+// UsersShared
+const usersShared: TelegramBot.UsersShared = {
+    request_id: 1,
+    users: [{ user_id: 123, first_name: "John" }],
+};
+
+// InlineQuery with chat_type
+const inlineQueryWithType: TelegramBot.InlineQuery = {
+    id: "query_123",
+    from: { id: 123, is_bot: false, first_name: "John" },
+    query: "search text",
+    offset: "",
+    chat_type: "private",
+};
+
+// KeyboardButtonRequestUsers
+const requestUsers: TelegramBot.KeyboardButtonRequestUsers = {
+    request_id: 1,
+    user_is_bot: false,
+    max_quantity: 5,
+    request_name: true,
+    request_photo: true,
+};
+
+// InputPollOption
+const inputPollOption: TelegramBot.InputPollOption = {
+    text: "Option 1",
+    text_parse_mode: "HTML",
+};
+
+// InputSticker
+const inputSticker: TelegramBot.InputSticker = {
+    sticker: "file_id_or_url",
+    format: "static",
+    emoji_list: ["😀"],
+};
+
+// SuccessfulPayment with subscription fields
+const successfulPayment: TelegramBot.SuccessfulPayment = {
+    currency: "XTR",
+    total_amount: 100,
+    invoice_payload: "payload",
+    telegram_payment_charge_id: "charge_123",
+    provider_payment_charge_id: "provider_123",
+    subscription_expiration_date: 1234567890,
+    is_recurring: true,
+    is_first_recurring: true,
+};
+
+// MessageEntityType blockquote
+const blockquoteEntity: TelegramBot.MessageEntity = {
+    type: "blockquote",
+    offset: 0,
+    length: 10,
+};
+
+// ChatAction choose_sticker
+MyTelegramBot.sendChatAction(1234, "choose_sticker");
+
+// PromoteChatMember with story permissions
+MyTelegramBot.promoteChatMember(1234, 5678, {
+    can_post_stories: true,
+    can_edit_stories: true,
+    can_delete_stories: true,
+});
+
+// AnswerInlineQuery with button
+MyTelegramBot.answerInlineQuery("queryId", [], {
+    button: { text: "Open", start_parameter: "start" },
+});
