@@ -371,6 +371,7 @@ MyTelegramBot.answerShippingQuery("shippingQueryId", true, {
     ],
 });
 MyTelegramBot.answerPreCheckoutQuery("preCheckoutQueryId", true, { error_message: "Bar" });
+MyTelegramBot.getStarTransactions({});
 MyTelegramBot.addListener("message", (message: TelegramBot.Message, { type }) => {});
 MyTelegramBot.addListener("callback_query", (query: TelegramBot.CallbackQuery) => {});
 MyTelegramBot.addListener("inline_query", (query: TelegramBot.InlineQuery) => {});
